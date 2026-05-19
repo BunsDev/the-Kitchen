@@ -3,65 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>auxslop // Web Port</title>
+    <title>auxslop // Web UI Engine Port</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body, html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #0d0e12;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-        #canvas-container {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
-        #ui-overlay {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 10;
-            color: #e0e4eb;
-            background: rgba(18, 20, 26, 0.85);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            pointer-events: auto;
-            max-width: 320px;
-        }
-        h1 {
-            font-size: 1.25rem;
-            margin-bottom: 5px;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-            color: #ffffff;
-        }
-        .status-tag {
-            display: inline-block;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            background: #238636;
-            color: #fff;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-        .metrics {
-            font-family: monospace;
-            font-size: 0.85rem;
-            color: #a3b3cc;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #191919; }
+        #canvas-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
     </style>
     <script type="importmap">
         {
@@ -76,108 +22,130 @@
 
     <div id="canvas-container"></div>
 
-    <div id="ui-overlay">
-        <h1>auxslop</h1>
-        <div class="status-tag">ThreeJS Engine Active</div>
-        <div class="metrics">
-            <p>Target: WebGL2 Canvas</p>
-            <p>Frame System: RequestAnimationFrame</p>
-            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0;">
-            <p id="fps-counter">FPS: --</p>
-            <p id="objects-counter">Render Objects: 0</p>
-        </div>
-    </div>
-
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-        import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 
-        // --- System Port State Organization ---
-        class ApplicationState {
-            constructor() {
-                this.container = document.getElementById('canvas-container');
-                this.scene = null;
-                this.camera = null;
-                this.renderer = null;
-                this.controls = null;
-                this.clock = new THREE.Clock();
+        // --- Core UI Engine Framework (Ported from Rev::Element) ---
+        class UIElement {
+            constructor(parent = null, name = "Element") {
+                this.name = name;
+                this.parent = parent;
+                this.children = [];
+                this.style = {
+                    width: 'auto',
+                    height: 'auto',
+                    padding: [0, 0, 0, 0], // Top, Right, Bottom, Left
+                    backgroundColor: new THREE.Color(0xffffff),
+                    backgroundAlpha: 0.0,
+                    borderRadius: 0
+                };
                 
-                // Analytics profiling
-                this.lastTime = performance.now();
-                this.frames = 0;
-                this.fpsElement = document.getElementById('fps-counter');
+                // Three.js Object Representation
+                this.group = new THREE.Group();
+                this.mesh = null;
 
-                this.init();
+                if (parent) {
+                    parent.addChild(this);
+                }
             }
 
-            init() {
-                // 1. Scene Construction
+            addChild(child) {
+                this.children.push(child);
+                this.group.add(child.group);
+            }
+
+            // Simple layout calculation mock to mimic your C++ layout pass
+            calculateLayout(computedWidth, computedHeight) {
+                let w = this.style.width === '100%' ? computedWidth : (this.style.width || 2);
+                let h = this.style.height === '100%' ? computedHeight : (this.style.height || 2);
+                
+                // Generate the visual plane if a background color/alpha is set
+                if (this.style.backgroundAlpha > 0) {
+                    if (this.mesh) this.group.remove(this.mesh);
+                    
+                    const geometry = new THREE.PlaneGeometry(w, h);
+                    const material = new THREE.MeshBasicMaterial({
+                        color: this.style.backgroundColor,
+                        transparent: true,
+                        opacity: this.style.backgroundAlpha,
+                        side: THREE.DoubleSide
+                    });
+                    
+                    this.mesh = new THREE.Mesh(geometry, material);
+                    this.group.add(this.mesh);
+                }
+
+                // Recursively layout children nested inside
+                this.children.forEach(child => {
+                    // Primitive shrink/center offset calculation
+                    child.calculateLayout(w * 0.8, h * 0.8);
+                    // Push slightly forward on Z-axis to prevent Z-fighting texture glitching
+                    child.group.position.z = 0.01; 
+                });
+            }
+        }
+
+        // --- Application Main ---
+        class App {
+            constructor() {
+                this.container = document.getElementById('canvas-container');
                 this.scene = new THREE.Scene();
-                this.scene.fog = new THREE.FogExp2(0x0d0e12, 0.015);
+                
+                // Styles.ixx: Color backgroundColor = Color(0.1, 0.1, 0.1, 1.0);
+                this.scene.background = new THREE.Color(0.1, 0.1, 0.1); 
 
-                // 2. Camera Viewport Matrix Setup (Replacing GLM configuration)
-                this.camera = new THREE.PerspectiveCamera(
-                    60, 
-                    window.innerWidth / window.innerHeight, 
-                    0.1, 
-                    1000
-                );
-                this.camera.position.set(0, 5, 15);
+                this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+                this.camera.position.set(0, 0, 12);
 
-                // 3. WebGL Renderer Context Instantiation
                 this.renderer = new THREE.WebGLRenderer({ antialias: true });
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
                 this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-                this.renderer.shadowMap.enabled = true;
                 this.container.appendChild(this.renderer.domElement);
 
-                // 4. Camera Manipulation Matrix Controls
                 this.controls = new OrbitControls(this.camera, this.renderer.domElement);
                 this.controls.enableDamping = true;
-                this.controls.dampingFactor = 0.05;
 
-                // 5. Environmental Lighting Pipeline
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
-                this.scene.add(ambientLight);
-
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-                directionalLight.position.set(10, 20, 10);
-                directionalLight.castShadow = true;
-                this.scene.add(directionalLight);
-
-                // 6. Native Geometry Core Testing (Mirroring Styles/Interface modules)
-                this.buildDemoScene();
-
-                // 7. Event Hooks
+                this.initUserInterface();
+                
                 window.addEventListener('resize', () => this.onWindowResize());
-
-                // Run render system loop
                 this.animate();
             }
 
-            buildDemoScene() {
-                // Test grid mapping layout
-                const gridHelper = new THREE.GridHelper(40, 40, 0x4f5b66, 0x232830);
-                gridHelper.position.y = -0.5;
-                this.scene.add(gridHelper);
+            initUserInterface() {
+                // Interface.ixx: Master interface container (this->style->size = 100_pct)
+                this.mainInterface = new UIElement(null, "MainInterface");
+                this.mainInterface.style.width = '100%';
+                this.mainInterface.style.height = '100%';
+                this.mainInterface.style.backgroundColor = new THREE.Color(0x191919); // rgba(25, 25, 25, 1.0)
+                this.mainInterface.style.backgroundAlpha = 1.0;
+                this.scene.add(this.mainInterface.group);
 
-                // Placeholder architectural volume
-                const geometry = new THREE.BoxGeometry(2, 2, 2);
-                const material = new THREE.MeshStandardMaterial({ 
-                    color: 0x4a90e2,
-                    roughness: 0.2,
-                    metalness: 0.1
-                });
-                
-                const mesh = new THREE.Mesh(geometry, material);
-                mesh.castShadow = true;
-                mesh.name = "core_volume";
-                this.scene.add(mesh);
+                // Interface.ixx: Grey box overlay layout
+                this.greyBox = new UIElement(this.mainInterface, "GreyBox");
+                this.greyBox.style.width = 6;  // Mock unit matching your max-width conversions
+                this.greyBox.style.height = 4; // Mock unit matching your max-height conversions
+                this.greyBox.style.backgroundColor = new THREE.Color(0xffffff); // rgba(255, 255, 255, 0.1)
+                this.greyBox.style.backgroundAlpha = 0.1;
 
-                // Populate data tracker tracking UI
-                document.getElementById('objects-counter').innerText = `Render Objects: ${this.scene.children.length}`;
+                // Testing the commented-out layout loop in Interface.ixx!
+                // Let's spin up 100 stress-test nodes inside our viewport container
+                const totalStressNodes = 100; 
+                for (let i = 0; i < totalStressNodes; i++) {
+                    let child = new UIElement(this.greyBox, `ChildNode_${i}`);
+                    child.style.width = 0.2;
+                    child.style.height = 0.2;
+                    child.style.backgroundColor = new THREE.Color(0xff8080); // rgba(1, 0.5, 0.5, 1.0)
+                    child.style.backgroundAlpha = 0.8;
+
+                    // Arrange them in a quick grid layout algorithmically
+                    let row = Math.floor(i / 10);
+                    let col = i % 10;
+                    child.group.position.set(-2.25 + (col * 0.5), 1.5 - (row * 0.5), 0);
+                }
+
+                // Fire initial layout tree calculation pass
+                this.mainInterface.calculateLayout(10, 8);
             }
 
             onWindowResize() {
@@ -186,40 +154,20 @@
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
             }
 
-            trackMetrics() {
-                this.frames++;
-                const time = performance.now();
-                if (time >= this.lastTime + 1000) {
-                    this.fpsElement.innerText = `FPS: ${Math.round((this.frames * 1000) / (time - this.lastTime))}`;
-                    this.frames = 0;
-                    this.lastTime = time;
-                }
-            }
-
             animate() {
                 requestAnimationFrame(() => this.animate());
+                this.controls.update();
 
-                const elapsedTime = this.clock.getElapsedTime();
-
-                // Animate structural matrix tracking components
-                const coreMesh = this.scene.getObjectByName("core_volume");
-                if (coreMesh) {
-                    coreMesh.rotation.y = elapsedTime * 0.5;
-                    coreMesh.rotation.x = elapsedTime * 0.2;
-                    coreMesh.position.y = Math.sin(elapsedTime * 1.5) * 0.5;
+                // Gentle rotation so you can see it's a true 3D plane layout in space!
+                if(this.mainInterface) {
+                    this.mainInterface.group.rotation.y = Math.sin(Date.now() * 0.0005) * 0.2;
                 }
 
-                this.controls.update();
                 this.renderer.render(this.scene, this.camera);
-                
-                this.trackMetrics();
             }
         }
 
-        // Initialize Core System Build Lifecycle on window mount
-        window.addEventListener('DOMContentLoaded', () => {
-            new ApplicationState();
-        });
+        window.addEventListener('DOMContentLoaded', () => new App());
     </script>
 </body>
 </html>
