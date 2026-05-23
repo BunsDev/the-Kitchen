@@ -29,13 +29,6 @@
     <meta name="twitter:description" content="A retro arcade hub serving Neon Invaders, Astroids, Cave Racer, RED EYE, Packman, Tetris, and more.">
     <meta name="twitter:image" content="https://frymatic.us/FTSArcade/FishTacoStand.png">
 
-    <!--
-      For best Discord/iMessage/Twitter cards, replace the og:image/twitter:image
-      URL above with a dedicated 1200x630 preview image when available.
-      Validate after deploy:
-      https://cards-dev.twitter.com/validator
-      https://developers.facebook.com/tools/debug/
-    -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -57,11 +50,15 @@
             --arcade-glow: 0 0 20px currentColor, 0 0 40px currentColor;
         }
 
-        body {
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
             background: var(--dark-bg);
             font-family: 'Press Start 2P', monospace;
-            overflow-x: hidden;
-            min-height: 100vh;
+        }
+
+        body {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -116,20 +113,28 @@
 
         .arcade-container {
             position: relative;
-            max-width: 95vw;
-            margin: 2rem auto;
-            filter: drop-shadow(0 0 40px rgba(0, 217, 255, 0.3));
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(0.5rem, 2vh, 1rem);
+            max-height: 100vh;
+            max-height: 100dvh; /* Dynamic viewport height for mobile */
         }
 
         .arcade-title {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
             font-family: 'Bungee', sans-serif;
-            font-size: clamp(1.5rem, 5vw, 3rem);
+            font-size: clamp(0.8rem, 3vh, 2rem);
             color: var(--neon-yellow);
             text-shadow: var(--arcade-glow);
             animation: titleGlow 2s ease-in-out infinite alternate;
-            letter-spacing: 0.2em;
+            letter-spacing: 0.1em;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         @keyframes titleGlow {
@@ -139,13 +144,20 @@
 
         .cabinet-wrapper {
             position: relative;
-            display: inline-block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            width: 100%;
+            max-width: min(90vw, calc(100vh - 8rem));
+            max-height: calc(100% - 4rem);
         }
 
         .arcade-image {
             display: block;
-            max-width: 100%;
-            height: auto;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
             border-radius: 12px;
         }
 
@@ -155,6 +167,7 @@
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             border: 2px solid transparent;
             background: rgba(0, 0, 0, 0);
+            border-radius: 4px;
         }
 
         .game-overlay:hover {
@@ -198,9 +211,9 @@
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.9);
             color: currentColor;
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 4px;
-            font-size: 10px;
+            font-size: clamp(6px, 1.5vh, 10px);
             white-space: nowrap;
             opacity: 0;
             pointer-events: none;
@@ -214,68 +227,69 @@
             bottom: -50px;
         }
 
-        /* Individual game colors */
+        /* Precise positioning based on the actual cabinet screen layout */
+        /* The game select screen occupies roughly 33% to 72% of the cabinet height */
+        /* Games are arranged in a 3x2 grid within that screen area */
+        
+        /* Top row games - each about 11.5% wide, positioned within the screen */
         .neon-invaders {
             color: var(--neon-blue);
-            /* Top left */
-            left: 35.51%;
-            top: 33.47%;
-            width: 11.75%;
-            height: 19.76%;
+            left: 35.5%;
+            top: 36.5%;
+            width: 11.5%;
+            height: 16%;
         }
 
         .astroids {
             color: var(--neon-yellow);
-            /* Top center */
-            left: 48.30%;
-            top: 33.47%;
-            width: 11.75%;
-            height: 19.76%;
+            left: 48.3%;
+            top: 36.5%;
+            width: 11.5%;
+            height: 16%;
         }
 
         .cave-racer {
             color: var(--neon-blue);
-            /* Top right */
-            left: 61.10%;
-            top: 33.47%;
-            width: 11.75%;
-            height: 19.76%;
+            left: 61.1%;
+            top: 36.5%;
+            width: 11.5%;
+            height: 16%;
         }
 
+        /* Bottom row games */
         .red-eye {
             color: var(--neon-red);
-            /* Bottom left */
-            left: 35.51%;
-            top: 54.69%;
-            width: 11.75%;
-            height: 16.83%;
+            left: 35.5%;
+            top: 54%;
+            width: 11.5%;
+            height: 15.5%;
         }
 
         .pac-man {
             color: var(--neon-yellow);
-            /* Bottom center */
-            left: 48.30%;
-            top: 55.47%;
-            width: 11.75%;
-            height: 16.05%;
+            left: 48.3%;
+            top: 54%;
+            width: 11.5%;
+            height: 15.5%;
         }
 
         .tetris {
             color: var(--neon-purple);
-            /* Bottom right */
-            left: 61%;
-            top: 60%;
-            width: 13%;
-            height: 23%;
+            left: 61.1%;
+            top: 54%;
+            width: 11.5%;
+            height: 15.5%;
         }
 
         .instructions {
             text-align: center;
-            margin-top: 3rem;
-            font-size: 12px;
+            margin-top: clamp(0.5rem, 1vh, 1rem);
+            font-size: clamp(6px, 1.5vh, 10px);
             color: var(--neon-green);
             text-shadow: 0 0 10px var(--neon-green);
             animation: blink 1.5s ease-in-out infinite;
+            flex-shrink: 0;
+            line-height: 1.6;
         }
 
         @keyframes blink {
@@ -285,40 +299,69 @@
 
         .credit-text {
             position: absolute;
-            bottom: 2%;
+            bottom: 3%;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 10px;
+            font-size: clamp(6px, 1.2vh, 9px);
             color: var(--neon-blue);
             text-shadow: 0 0 10px var(--neon-blue);
+            white-space: nowrap;
         }
 
-        @media (max-width: 768px) {
+        /* Mobile landscape optimization */
+        @media (max-height: 500px) and (orientation: landscape) {
             .arcade-title {
-                font-size: 1.2rem;
-                margin-bottom: 1rem;
-            }
-
-            .game-overlay::after {
-                font-size: 8px;
-                padding: 6px 12px;
+                font-size: clamp(0.6rem, 2.5vh, 1.2rem);
+                margin-bottom: 0.3rem;
             }
 
             .instructions {
-                font-size: 10px;
-                padding: 0 1rem;
+                font-size: clamp(5px, 1.2vh, 8px);
+                margin-top: 0.3rem;
+            }
+
+            .game-overlay::after {
+                font-size: clamp(5px, 1.2vh, 8px);
+                padding: 4px 8px;
+            }
+        }
+
+        /* Mobile portrait optimization */
+        @media (max-width: 768px) and (orientation: portrait) {
+            .arcade-title {
+                font-size: clamp(0.8rem, 3vw, 1.5rem);
+            }
+
+            .cabinet-wrapper {
+                max-width: 95vw;
+            }
+        }
+
+        /* Very small screens */
+        @media (max-width: 400px) {
+            .arcade-title {
+                font-size: 0.7rem;
+                letter-spacing: 0.05em;
+            }
+
+            .instructions br {
+                display: none;
+            }
+
+            .instructions {
+                font-size: 7px;
             }
         }
     </style>
 </head>
 <body>
-    <h1 class="arcade-title">🌮 FISHTACOSTAND ARCADE 🌮</h1>
-    
     <div class="arcade-container">
+        <h1 class="arcade-title">🌮 FISHTACOSTAND ARCADE 🌮</h1>
+        
         <div class="cabinet-wrapper">
             <img src="FishTacoStand.png" alt="Arcade Cabinet" class="arcade-image">
             
-            <!-- Clickable game overlays -->
+            <!-- Clickable game overlays with corrected positions -->
             <a href="https://frymatic.us/FTSArcade/neon-invaders.html" target="_blank" 
                class="game-overlay neon-invaders" 
                data-game="NEON INVADERS"
@@ -351,12 +394,12 @@
 
             <div class="credit-text">INSERT COIN</div>
         </div>
-    </div>
 
-    <p class="instructions">
-        ▲ HOVER OVER GAMES TO SELECT ▲<br>
-        CLICK TO PLAY
-    </p>
+        <p class="instructions">
+            ▲ HOVER OVER GAMES TO SELECT ▲<br>
+            CLICK TO PLAY
+        </p>
+    </div>
 
     <script>
         // Add sound effects on hover (optional - using Web Audio API)
