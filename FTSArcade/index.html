@@ -111,7 +111,6 @@
         }
 
         .cabinet-wrapper {
-            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -121,11 +120,19 @@
             padding: clamp(0.5rem, 2vh, 2rem);
         }
 
+        .image-container {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
         .arcade-image {
             display: block;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
             border-radius: 12px;
         }
 
@@ -283,38 +290,40 @@
 </head>
 <body>
     <div class="cabinet-wrapper">
-        <img src="FishTacoStand.png" alt="Arcade Cabinet" class="arcade-image">
-        
-        <!-- Clickable game overlays with corrected positions -->
-        <a href="https://frymatic.us/FTSArcade/neon-invaders.html" target="_blank" 
-           class="game-overlay neon-invaders" 
-           data-game="NEON INVADERS"
-           aria-label="Play Neon Invaders"></a>
-        
-        <a href="https://frymatic.us/FTSArcade/astroids.html" target="_blank" 
-           class="game-overlay astroids" 
-           data-game="ASTROIDS"
-           aria-label="Play Astroids"></a>
-        
-        <a href="https://frymatic.us/FTSArcade/cave-racer.html" target="_blank" 
-           class="game-overlay cave-racer" 
-           data-game="CAVE RACER"
-           aria-label="Play Cave Racer"></a>
-        
-        <a href="https://frymatic.us/FTSArcade/redeye-hud.html" target="_blank" 
-           class="game-overlay red-eye" 
-           data-game="RED EYE"
-           aria-label="Play Red Eye"></a>
-        
-        <a href="https://frymatic.us/FTSArcade/packman.html" target="_blank" 
-           class="game-overlay pac-man" 
-           data-game="PAC MAN"
-           aria-label="Play Pac Man"></a>
-        
-        <a href="https://frymatic.us/FTSArcade/tetris.html" target="_blank" 
-           class="game-overlay tetris" 
-           data-game="TETRIS"
-           aria-label="Play Tetris"></a>
+        <div class="image-container">
+            <img src="FishTacoStand.png" alt="Arcade Cabinet" class="arcade-image">
+            
+            <!-- Clickable game overlays with corrected positions -->
+            <a href="https://frymatic.us/FTSArcade/neon-invaders.html" target="_blank" 
+               class="game-overlay neon-invaders" 
+               data-game="NEON INVADERS"
+               aria-label="Play Neon Invaders"></a>
+            
+            <a href="https://frymatic.us/FTSArcade/astroids.html" target="_blank" 
+               class="game-overlay astroids" 
+               data-game="ASTROIDS"
+               aria-label="Play Astroids"></a>
+            
+            <a href="https://frymatic.us/FTSArcade/cave-racer.html" target="_blank" 
+               class="game-overlay cave-racer" 
+               data-game="CAVE RACER"
+               aria-label="Play Cave Racer"></a>
+            
+            <a href="https://frymatic.us/FTSArcade/redeye-hud.html" target="_blank" 
+               class="game-overlay red-eye" 
+               data-game="RED EYE"
+               aria-label="Play Red Eye"></a>
+            
+            <a href="https://frymatic.us/FTSArcade/packman.html" target="_blank" 
+               class="game-overlay pac-man" 
+               data-game="PAC MAN"
+               aria-label="Play Pac Man"></a>
+            
+            <a href="https://frymatic.us/FTSArcade/tetris.html" target="_blank" 
+               class="game-overlay tetris" 
+               data-game="TETRIS"
+               aria-label="Play Tetris"></a>
+        </div>
     </div>
 
     <script>
