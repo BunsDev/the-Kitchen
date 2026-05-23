@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>POSTAL PACMAN</title>
+  <title>POSTAL PACKMAN</title>
   
   <meta name="description" content="POSTAL PACMAN — Deliver letters, collect boxes, and outrun envelope ghosts in this neon arcade adventure." />
   
@@ -254,8 +254,8 @@ const MAZES = [
 ];
 
 // ── POSTAL LETTERS FOR DOTS ──────────────────────────────────────────────────
-// Letter types: envelope, postcard, stamp
-const LETTER_TYPES = ['envelope', 'postcard', 'stamp'];
+const POSTAL_WORDS = ['MAIL', 'POST', 'STAMP', 'SEND', 'LETTER', 'BOX', 'ROUTE', 'ZIP', 'DELIVER'];
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
 // ── GAME STATE ────────────────────────────────────────────────────────────────
 let S = {
@@ -316,8 +316,8 @@ function init() {
       if (ch === '#') {
         S.walls.push({ x, y });
       } else if (ch === '.') {
-        const type = LETTER_TYPES[Math.floor(Math.random() * LETTER_TYPES.length)];
-        S.dots.push({ x: x + CELL/2, y: y + CELL/2, type, collected: false });
+        const letter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+        S.dots.push({ x: x + CELL/2, y: y + CELL/2, letter, collected: false });
       } else if (ch === 'B') {
         S.powerBoxes.push({ x: x + CELL/2, y: y + CELL/2, collected: false });
       }
@@ -647,7 +647,7 @@ function render() {
   }
   ctx.restore();
   
-  // Dots (letters/mail)
+  // Dots (letters)
   ctx.save();
   for (const d of S.dots) {
     if (d.collected) continue;
@@ -655,34 +655,10 @@ function render() {
     ctx.globalAlpha = pulse;
     drawGlow(S.palette.dot, 12);
     ctx.fillStyle = S.palette.dot;
-    
-    // Draw different mail types
-    if (d.type === 'envelope') {
-      // Small envelope
-      const sz = 6;
-      ctx.fillRect(d.x - sz/2, d.y - sz/3, sz, sz * 0.6);
-      // Flap
-      ctx.beginPath();
-      ctx.moveTo(d.x - sz/2, d.y - sz/3);
-      ctx.lineTo(d.x, d.y);
-      ctx.lineTo(d.x + sz/2, d.y - sz/3);
-      ctx.fill();
-    } else if (d.type === 'postcard') {
-      // Postcard (rectangle)
-      const sz = 6;
-      ctx.fillRect(d.x - sz/2, d.y - sz/2.5, sz, sz * 0.8);
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(d.x - sz/4, d.y - sz/4, sz/2, 1);
-      ctx.fillRect(d.x - sz/4, d.y, sz/2, 1);
-    } else {
-      // Stamp (small square)
-      const sz = 5;
-      ctx.fillRect(d.x - sz/2, d.y - sz/2, sz, sz);
-      // Perforation effect
-      ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(d.x - sz/2, d.y - sz/2, sz, sz);
-    }
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(d.letter, d.x, d.y);
   }
   ctx.restore();
   
