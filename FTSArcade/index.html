@@ -60,7 +60,6 @@
 
         body {
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             position: relative;
@@ -111,46 +110,15 @@
             100% { opacity: 0.6; }
         }
 
-        .arcade-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: clamp(0.5rem, 2vh, 1rem);
-            max-height: 100vh;
-            max-height: 100dvh; /* Dynamic viewport height for mobile */
-        }
-
-        .arcade-title {
-            text-align: center;
-            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
-            font-family: 'Bungee', sans-serif;
-            font-size: clamp(0.8rem, 3vh, 2rem);
-            color: var(--neon-yellow);
-            text-shadow: var(--arcade-glow);
-            animation: titleGlow 2s ease-in-out infinite alternate;
-            letter-spacing: 0.1em;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        @keyframes titleGlow {
-            0% { text-shadow: 0 0 10px var(--neon-yellow), 0 0 20px var(--neon-yellow); }
-            100% { text-shadow: 0 0 20px var(--neon-yellow), 0 0 40px var(--neon-yellow), 0 0 60px var(--neon-yellow); }
-        }
-
         .cabinet-wrapper {
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex: 1;
-            width: 100%;
-            max-width: min(90vw, calc(100vh - 8rem));
-            max-height: calc(100% - 4rem);
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh; /* Dynamic viewport height for mobile */
+            padding: clamp(0.5rem, 2vh, 2rem);
         }
 
         .arcade-image {
@@ -233,7 +201,7 @@
         
         /* Top row games - each about 11.5% wide, positioned within the screen */
         .neon-invaders {
-            color: var(--neon-blue);
+            color: var(--neon-pink);
             left: 35.5%;
             top: 36.5%;
             width: 11.5%;
@@ -241,7 +209,7 @@
         }
 
         .astroids {
-            color: var(--neon-yellow);
+            color: var(--neon-green);
             left: 48.3%;
             top: 36.5%;
             width: 11.5%;
@@ -281,43 +249,10 @@
             height: 15.5%;
         }
 
-        .instructions {
-            text-align: center;
-            margin-top: clamp(0.5rem, 1vh, 1rem);
-            font-size: clamp(6px, 1.5vh, 10px);
-            color: var(--neon-green);
-            text-shadow: 0 0 10px var(--neon-green);
-            animation: blink 1.5s ease-in-out infinite;
-            flex-shrink: 0;
-            line-height: 1.6;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .credit-text {
-            position: absolute;
-            bottom: 3%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: clamp(6px, 1.2vh, 9px);
-            color: var(--neon-blue);
-            text-shadow: 0 0 10px var(--neon-blue);
-            white-space: nowrap;
-        }
-
         /* Mobile landscape optimization */
         @media (max-height: 500px) and (orientation: landscape) {
-            .arcade-title {
-                font-size: clamp(0.6rem, 2.5vh, 1.2rem);
-                margin-bottom: 0.3rem;
-            }
-
-            .instructions {
-                font-size: clamp(5px, 1.2vh, 8px);
-                margin-top: 0.3rem;
+            .cabinet-wrapper {
+                padding: clamp(0.3rem, 1vh, 1rem);
             }
 
             .game-overlay::after {
@@ -328,77 +263,58 @@
 
         /* Mobile portrait optimization */
         @media (max-width: 768px) and (orientation: portrait) {
-            .arcade-title {
-                font-size: clamp(0.8rem, 3vw, 1.5rem);
-            }
-
             .cabinet-wrapper {
-                max-width: 95vw;
+                padding: clamp(0.5rem, 2vw, 1.5rem);
             }
         }
 
         /* Very small screens */
         @media (max-width: 400px) {
-            .arcade-title {
-                font-size: 0.7rem;
-                letter-spacing: 0.05em;
+            .cabinet-wrapper {
+                padding: 0.5rem;
             }
 
-            .instructions br {
-                display: none;
-            }
-
-            .instructions {
-                font-size: 7px;
+            .game-overlay::after {
+                font-size: 6px;
+                padding: 3px 6px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="arcade-container">
-        <h1 class="arcade-title">🌮 FISHTACOSTAND ARCADE 🌮</h1>
+    <div class="cabinet-wrapper">
+        <img src="FishTacoStand.png" alt="Arcade Cabinet" class="arcade-image">
         
-        <div class="cabinet-wrapper">
-            <img src="FishTacoStand.png" alt="Arcade Cabinet" class="arcade-image">
-            
-            <!-- Clickable game overlays with corrected positions -->
-            <a href="https://frymatic.us/FTSArcade/neon-invaders.html" target="_blank" 
-               class="game-overlay neon-invaders" 
-               data-game="NEON INVADERS"
-               aria-label="Play Neon Invaders"></a>
-            
-            <a href="https://frymatic.us/FTSArcade/astroids.html" target="_blank" 
-               class="game-overlay astroids" 
-               data-game="ASTROIDS"
-               aria-label="Play Astroids"></a>
-            
-            <a href="https://frymatic.us/FTSArcade/cave-racer.html" target="_blank" 
-               class="game-overlay cave-racer" 
-               data-game="CAVE RACER"
-               aria-label="Play Cave Racer"></a>
-            
-            <a href="https://frymatic.us/FTSArcade/redeye-hud.html" target="_blank" 
-               class="game-overlay red-eye" 
-               data-game="RED EYE"
-               aria-label="Play Red Eye"></a>
-            
-            <a href="https://frymatic.us/FTSArcade/packman.html" target="_blank" 
-               class="game-overlay pac-man" 
-               data-game="PAC MAN"
-               aria-label="Play Pac Man"></a>
-            
-            <a href="https://frymatic.us/FTSArcade/tetris.html" target="_blank" 
-               class="game-overlay tetris" 
-               data-game="TETRIS"
-               aria-label="Play Tetris"></a>
-
-            <div class="credit-text">INSERT COIN</div>
-        </div>
-
-        <p class="instructions">
-            ▲ HOVER OVER GAMES TO SELECT ▲<br>
-            CLICK TO PLAY
-        </p>
+        <!-- Clickable game overlays with corrected positions -->
+        <a href="https://frymatic.us/FTSArcade/neon-invaders.html" target="_blank" 
+           class="game-overlay neon-invaders" 
+           data-game="NEON INVADERS"
+           aria-label="Play Neon Invaders"></a>
+        
+        <a href="https://frymatic.us/FTSArcade/astroids.html" target="_blank" 
+           class="game-overlay astroids" 
+           data-game="ASTROIDS"
+           aria-label="Play Astroids"></a>
+        
+        <a href="https://frymatic.us/FTSArcade/cave-racer.html" target="_blank" 
+           class="game-overlay cave-racer" 
+           data-game="CAVE RACER"
+           aria-label="Play Cave Racer"></a>
+        
+        <a href="https://frymatic.us/FTSArcade/redeye-hud.html" target="_blank" 
+           class="game-overlay red-eye" 
+           data-game="RED EYE"
+           aria-label="Play Red Eye"></a>
+        
+        <a href="https://frymatic.us/FTSArcade/packman.html" target="_blank" 
+           class="game-overlay pac-man" 
+           data-game="PAC MAN"
+           aria-label="Play Pac Man"></a>
+        
+        <a href="https://frymatic.us/FTSArcade/tetris.html" target="_blank" 
+           class="game-overlay tetris" 
+           data-game="TETRIS"
+           aria-label="Play Tetris"></a>
     </div>
 
     <script>
