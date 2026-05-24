@@ -3,20 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>VECTOR SQUADRON | Isometric Space Shooter</title>
-    <!-- ── Primary Meta ─────────────────────────────────────────────────────── -->
-    <meta name="description" content="Astrovulpis" />
-
-    <!-- ── Open Graph (Facebook, Discord, iMessage, etc.) ────────────────────── -->
-    <meta property="og:title" content="VECTOR SQUADRON">
-    <meta property="og:description" content="Defend the neon realm in this high-octane arcade experience.">
-    <meta property="og:url" content="https://mofrymatic.github.io/the-KitchenFTSArcade/starfox_shooter.html">
-    <meta property="og:type" content="website">
-
-    <meta property="og:image" content="https://mofrymatic.github.io/the-Kitchen/FTSArcade/starfox_preview.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:type" content="image/png">
+    <title>VECTOR SQUADRON | Advanced Flight Physics</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght:400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
         
@@ -107,6 +94,46 @@
             text-shadow: 0 0 15px var(--neon-yellow);
         }
         
+        /* Speed indicator */
+        #speedMeter {
+            position: absolute;
+            top: 30px;
+            right: 110px;
+            font-family: 'Orbitron', monospace;
+            text-align: right;
+        }
+        
+        .speed-label {
+            font-size: 14px;
+            color: var(--neon-cyan);
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+        
+        .speed-value {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--neon-magenta);
+            text-shadow: 0 0 20px var(--neon-magenta);
+            letter-spacing: 3px;
+        }
+        
+        .speed-bar {
+            width: 200px;
+            height: 8px;
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid var(--neon-cyan);
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        .speed-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta), var(--neon-yellow));
+            box-shadow: 0 0 15px var(--neon-magenta);
+            transition: width 0.1s ease;
+        }
+        
         #health-bar {
             position: absolute;
             bottom: 40px;
@@ -165,10 +192,11 @@
         }
         
         #title p {
-            font-size: 20px;
-            letter-spacing: 4px;
+            font-size: 18px;
+            letter-spacing: 3px;
             color: var(--neon-magenta);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            line-height: 1.6;
         }
         
         #startBtn {
@@ -251,7 +279,7 @@
             opacity: 0.3;
         }
         
-        /* Center reticle - shows forward firing direction */
+        /* Center reticle */
         #centerReticle {
             position: fixed;
             width: 40px;
@@ -320,6 +348,14 @@
             text-align: center;
         }
         
+        body.mobile.portrait #speedMeter {
+            top: 160px;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        
         body.mobile.portrait .stat-line {
             justify-content: center;
         }
@@ -353,6 +389,20 @@
             font-size: 18px;
         }
         
+        body.mobile.landscape #speedMeter {
+            top: 20px;
+            right: 20px;
+            font-size: 12px;
+        }
+        
+        body.mobile.landscape .speed-value {
+            font-size: 24px;
+        }
+        
+        body.mobile.landscape .speed-bar {
+            width: 150px;
+        }
+        
         body.mobile.landscape #health-bar {
             width: 300px;
             height: 20px;
@@ -363,42 +413,6 @@
             width: 50px;
             height: 50px;
         }
-        
-        /* Orientation hint */
-        .orientation-hint {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 30px;
-            border: 2px solid var(--neon-cyan);
-            border-radius: 10px;
-            text-align: center;
-            font-family: 'Orbitron', monospace;
-            color: var(--neon-cyan);
-            z-index: 200;
-            display: none;
-        }
-        
-        .orientation-hint.show {
-            display: block;
-            animation: pulse-hint 1s infinite;
-        }
-        
-        @keyframes pulse-hint {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        
-        .orientation-hint svg {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 20px;
-            stroke: var(--neon-cyan);
-            fill: none;
-            stroke-width: 2;
-        }
     </style>
 </head>
 <body>
@@ -406,19 +420,8 @@
     
     <div class="scanlines"></div>
     
-    <!-- Center Reticle - Shows forward firing direction -->
     <div id="centerReticle">
         <div class="reticle-ring"></div>
-    </div>
-    
-    <!-- Orientation Hint -->
-    <div class="orientation-hint" id="orientationHint">
-        <svg viewBox="0 0 100 100">
-            <rect x="20" y="35" width="60" height="30" rx="5"/>
-            <path d="M 50 35 L 50 20 M 45 25 L 50 20 L 55 25"/>
-        </svg>
-        <div style="font-size: 16px; letter-spacing: 2px;">ROTATE TO LANDSCAPE</div>
-        <div style="font-size: 12px; margin-top: 10px; opacity: 0.7;">FOR OPTIMAL EXPERIENCE</div>
     </div>
     
     <div id="hud">
@@ -442,13 +445,23 @@
             </div>
         </div>
         
+        <div id="speedMeter">
+            <div class="speed-label">VELOCITY</div>
+            <div class="speed-value" id="speedValue">1.0×</div>
+            <div class="speed-bar">
+                <div class="speed-fill" id="speedFill" style="width: 50%;"></div>
+            </div>
+        </div>
+        
         <div id="health-bar">
             <div id="health-fill" style="width: 100%;"></div>
         </div>
         
         <div id="title">
             <h1>VECTOR SQUADRON</h1>
-            <p id="controlsText">POSITION SHIP TO AIM • CLICK TO FIRE</p>
+            <p id="controlsText">MOUSE: AIM & POSITION</p>
+            <p>W: BOOST • S: BRAKE • A/D: STRAFE</p>
+            <p>CLICK: FIRE</p>
             <button id="startBtn">ENGAGE</button>
         </div>
         
@@ -470,16 +483,8 @@
         function detectOrientation() {
             const isPortrait = window.innerHeight > window.innerWidth;
             currentOrientation = isPortrait ? 'portrait' : 'landscape';
-            
             document.body.classList.remove('portrait', 'landscape');
             document.body.classList.add(currentOrientation);
-            
-            const hint = document.getElementById('orientationHint');
-            if (isMobile && isPortrait && gameState.playing) {
-                hint.classList.add('show');
-            } else {
-                hint.classList.remove('show');
-            }
         }
         
         if (isMobile) {
@@ -491,7 +496,35 @@
         window.addEventListener('resize', detectOrientation);
         window.addEventListener('orientationchange', detectOrientation);
         
-        // Input State - Direct Position Control
+        // Keyboard State
+        const keys = { w: false, a: false, s: false, d: false };
+        
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if (key in keys) keys[key] = true;
+            if (key === ' ') e.preventDefault();
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            if (key in keys) keys[key] = false;
+        });
+        
+        // Advanced Flight Physics Engine
+        const flightPhysics = {
+            velocity: new THREE.Vector3(0, 0, 0),
+            targetRoll: 0,
+            targetPitch: 0,
+            targetYaw: 0,
+            boostFactor: 1.0,
+            baseFov: 75,
+            targetFov: 75,
+            stiffness: 0.12,      // How aggressively ship chases cursor
+            damping: 0.78,        // Resistance to prevent rubber-banding
+            currentSpeed: 0       // For UI display
+        };
+        
+        // Input State
         const input = {
             screenX: window.innerWidth / 2,
             screenY: window.innerHeight / 2,
@@ -593,7 +626,7 @@
             engine.position.z = -1.5;
             group.add(engine);
             
-            group.position.y = 2;
+            group.position.y = 6.5;
             return group;
         }
         
@@ -736,6 +769,11 @@
             document.getElementById('combo').textContent = `×${gameState.combo}`;
             document.getElementById('wave').textContent = gameState.wave;
             
+            // Speed display
+            const speedPercent = Math.min(100, (flightPhysics.currentSpeed / 2.5) * 100);
+            document.getElementById('speedValue').textContent = flightPhysics.boostFactor.toFixed(1) + '×';
+            document.getElementById('speedFill').style.width = speedPercent + '%';
+            
             const healthPercent = Math.max(0, gameState.health);
             const healthFill = document.getElementById('health-fill');
             healthFill.style.width = healthPercent + '%';
@@ -757,13 +795,10 @@
         function updateInput(clientX, clientY) {
             input.screenX = clientX;
             input.screenY = clientY;
-            
-            // Convert screen coordinates to normalized space (-1 to 1)
             input.normalizedX = (clientX / window.innerWidth) * 2 - 1;
             input.normalizedY = -((clientY / window.innerHeight) * 2 - 1);
         }
         
-        // Mouse Events
         document.addEventListener('mousemove', (e) => {
             if (!gameState.playing) return;
             input.active = true;
@@ -779,7 +814,6 @@
             input.firing = false;
         });
         
-        // Touch Events
         document.addEventListener('touchstart', (e) => {
             if (!gameState.playing) return;
             e.preventDefault();
@@ -810,27 +844,85 @@
         function gameLoop() {
             if (!gameState.playing) return;
             
-            // Direct Position Control - Ship follows cursor/touch
-            if (input.active) {
-                // Map normalized input to game space
-                const targetX = input.normalizedX * 10;
-                const targetY = input.normalizedY * 5.5 + 6.5;
-                
-                // Smooth lerp to target
-                const smoothing = 0.15;
-                player.position.x += (targetX - player.position.x) * smoothing;
-                player.position.y += (targetY - player.position.y) * smoothing;
-                
-                // Clamp to bounds
-                player.position.x = Math.max(-10, Math.min(10, player.position.x));
-                player.position.y = Math.max(1, Math.min(12, player.position.y));
-                
-                // Ship tilts toward movement direction
-                const deltaX = targetX - player.position.x;
-                const deltaY = targetY - player.position.y;
-                player.rotation.z = -deltaX * 0.15;
-                player.rotation.x = deltaY * 0.1;
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // ADVANCED FLIGHT DYNAMICS WITH SPRING PHYSICS
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            
+            // 1. Calculate Cursor Attractor Force (Spring Physics)
+            const targetX = input.active ? input.normalizedX * 12 : 0;
+            const targetY = input.active ? (input.normalizedY * 6 + 6.5) : 6.5;
+            
+            const distX = targetX - player.position.x;
+            const distY = targetY - player.position.y;
+            
+            // Base spring acceleration forces
+            let accelX = distX * flightPhysics.stiffness;
+            let accelY = distY * flightPhysics.stiffness;
+            
+            // 2. Process WASD Kinetic Overrides
+            flightPhysics.boostFactor = 1.0;
+            flightPhysics.targetFov = flightPhysics.baseFov;
+            
+            // W: Thruster Hyper-Boost
+            if (keys.w) {
+                flightPhysics.boostFactor = 2.2;
+                flightPhysics.targetFov = 95;  // Extreme warp speed effect
+                accelY += 0.04;                // Slight forward lift
             }
+            // S: Airbrakes / Controlled Drift
+            if (keys.s) {
+                flightPhysics.boostFactor = 0.3;
+                flightPhysics.targetFov = 64;  // Heavy zoom-in focus
+                accelY -= 0.04;
+            }
+            // A/D: Heavy Lateral Jet-Slips
+            if (keys.a) accelX -= 0.18;
+            if (keys.d) accelX += 0.18;
+            
+            // 3. Apply Forces to Velocity & Damping (Inertia)
+            flightPhysics.velocity.x += accelX;
+            flightPhysics.velocity.y += accelY;
+            
+            flightPhysics.velocity.x *= flightPhysics.damping;
+            flightPhysics.velocity.y *= flightPhysics.damping;
+            
+            // 4. Update Position
+            player.position.x += flightPhysics.velocity.x;
+            player.position.y += flightPhysics.velocity.y;
+            
+            // Boundaries
+            player.position.x = Math.max(-13, Math.min(13, player.position.x));
+            player.position.y = Math.max(1, Math.min(13, player.position.y));
+            
+            // 5. Dynamic Kinetic Rotations (Banking & Pitching)
+            flightPhysics.targetRoll = -flightPhysics.velocity.x * 2.2;
+            if (keys.a) flightPhysics.targetRoll += 0.6;
+            if (keys.d) flightPhysics.targetRoll -= 0.6;
+            
+            flightPhysics.targetPitch = (flightPhysics.velocity.y * 0.8);
+            if (keys.w) flightPhysics.targetPitch -= 0.15;  // Nose down on boost
+            if (keys.s) flightPhysics.targetPitch += 0.15;  // Nose up on brake
+            
+            flightPhysics.targetYaw = -flightPhysics.velocity.x * 0.6;
+            
+            // Smooth blend rotations
+            player.rotation.z += (flightPhysics.targetRoll - player.rotation.z) * 0.18;
+            player.rotation.x += (flightPhysics.targetPitch - player.rotation.x) * 0.18;
+            player.rotation.y += (flightPhysics.targetYaw - player.rotation.y) * 0.18;
+            
+            // 6. Camera FOV Lens Warping
+            if (Math.abs(camera.fov - flightPhysics.targetFov) > 0.1) {
+                camera.fov += (flightPhysics.targetFov - camera.fov) * 0.12;
+                camera.updateProjectionMatrix();
+            }
+            
+            // Calculate current speed for UI
+            flightPhysics.currentSpeed = Math.sqrt(
+                flightPhysics.velocity.x * flightPhysics.velocity.x +
+                flightPhysics.velocity.y * flightPhysics.velocity.y
+            ) * flightPhysics.boostFactor;
+            
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             
             // Shooting
             if (input.firing) shoot();
@@ -871,7 +963,6 @@
                     scene.remove(enemy);
                     enemies.splice(i, 1);
                     gameState.combo = 1;
-                    updateHUD();
                     
                     if (isMobile && window.vibrate) {
                         window.vibrate(50);
@@ -919,7 +1010,6 @@
                         scene.remove(proj);
                         projectiles.splice(i, 1);
                         shake(0.2);
-                        updateHUD();
                         break;
                     }
                 }
@@ -930,7 +1020,6 @@
                 gameState.comboTimer--;
             } else if (gameState.combo > 1) {
                 gameState.combo = Math.max(1, gameState.combo - 1);
-                updateHUD();
             }
             
             // Update Particles
@@ -946,10 +1035,12 @@
                 }
             }
             
-            // Star Field Parallax
+            // Star Field Parallax - Scaled by Flight Momentum
             const starPositions = starField.geometry.attributes.position.array;
+            const currentWarpSpeed = 0.5 * flightPhysics.boostFactor;
+            
             for (let i = 2; i < starPositions.length; i += 3) {
-                starPositions[i] += 0.5;
+                starPositions[i] += currentWarpSpeed;
                 if (starPositions[i] > 50) {
                     starPositions[i] = -100;
                 }
@@ -957,18 +1048,18 @@
             starField.geometry.attributes.position.needsUpdate = true;
             
             // Camera Follow with Shake
-            const targetX = player.position.x * 0.3;
-            let targetY = player.position.y + 13;
-            let targetZ = 20;
+            const targetCamX = player.position.x * 0.3;
+            let targetCamY = player.position.y + 13;
+            let targetCamZ = 20;
             
             if (isMobile && currentOrientation === 'portrait') {
-                targetY = player.position.y + 18;
-                targetZ = 25;
+                targetCamY = player.position.y + 18;
+                targetCamZ = 25;
             }
             
-            camera.position.x += (targetX - camera.position.x) * 0.1;
-            camera.position.y += (targetY - camera.position.y) * 0.1;
-            camera.position.z += (targetZ - camera.position.z) * 0.1;
+            camera.position.x += (targetCamX - camera.position.x) * 0.1;
+            camera.position.y += (targetCamY - camera.position.y) * 0.1;
+            camera.position.z += (targetCamZ - camera.position.z) * 0.1;
             
             if (shakeAmount > 0) {
                 camera.position.x += (Math.random() - 0.5) * shakeAmount;
@@ -977,6 +1068,9 @@
             }
             
             camera.lookAt(player.position);
+            
+            // Update HUD
+            updateHUD();
             
             // Game Over
             if (gameState.health <= 0) {
@@ -1001,14 +1095,18 @@
             particles.forEach(p => scene.remove(p));
             particles.length = 0;
             
-            player.position.set(0, 2, 0);
+            player.position.set(0, 6.5, 0);
+            flightPhysics.velocity.set(0, 0, 0);
+            flightPhysics.boostFactor = 1.0;
+            flightPhysics.targetFov = flightPhysics.baseFov;
+            camera.fov = flightPhysics.baseFov;
+            camera.updateProjectionMatrix();
             
-            // Initialize input to center of screen
             input.screenX = window.innerWidth / 2;
             input.screenY = window.innerHeight / 2;
             input.normalizedX = 0;
             input.normalizedY = 0;
-            input.active = !isMobile; // Auto-active on desktop
+            input.active = !isMobile;
             
             document.getElementById('title').style.display = 'none';
             document.getElementById('gameOver').style.display = 'none';
@@ -1032,7 +1130,6 @@
             gameLoop();
         }
         
-        // Event Listeners
         document.getElementById('startBtn').addEventListener('click', startGame);
         document.getElementById('restartBtn').addEventListener('click', startGame);
         
@@ -1042,7 +1139,6 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
         
-        // Initial Render
         renderer.render(scene, camera);
     </script>
 </body>
