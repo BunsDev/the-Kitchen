@@ -605,7 +605,7 @@
         scene.add(pointLight2);
         
         // Player Ship - Enhanced for 3rd Person Visibility
-        // GLB Model Loading
+        // GLB Model Loading - Dopeship
         let player = null;
         let playerModelLoaded = false;
         
@@ -613,45 +613,49 @@
             const group = new THREE.Group();
             group.position.y = 6.5;
             
-            // Load GLB model
+            // Load dopeship.glb model
             const loader = new THREE.GLTFLoader();
             loader.load(
                 'dopeship.glb',
                 (gltf) => {
                     const model = gltf.scene;
                     
-                    // Scale and orient the model
-                    model.scale.set(2, 2, 2);  // Adjust scale as needed
+                    // Scale and orient the model (adjust these values based on how dopeship looks)
+                    model.scale.set(1.5, 1.5, 1.5);  // Start with 1.5x scale
                     model.rotation.y = Math.PI;  // Face forward (180 degrees)
                     
-                    // Enhance materials for better visibility
+                    // Enhance materials for neon aesthetic
                     model.traverse((child) => {
                         if (child.isMesh) {
                             child.castShadow = true;
                             child.receiveShadow = true;
                             if (child.material) {
-                                // Boost emissive for neon look
+                                // Boost emissive for cyberpunk neon look
                                 child.material.emissive = new THREE.Color(0x00ffff);
                                 child.material.emissiveIntensity = 0.3;
+                                child.material.metalness = 0.8;
+                                child.material.roughness = 0.2;
                             }
                         }
                     });
                     
                     group.add(model);
                     playerModelLoaded = true;
-                    console.log('✓ Nebula Shadow Fighter loaded');
+                    console.log('✓ Dopeship loaded and ready');
                 },
                 (progress) => {
-                    console.log('Loading model:', (progress.loaded / progress.total * 100).toFixed(0) + '%');
+                    if (progress.total > 0) {
+                        console.log('Loading dopeship:', (progress.loaded / progress.total * 100).toFixed(0) + '%');
+                    }
                 },
                 (error) => {
-                    console.error('Error loading GLB model:', error);
-                    // Fallback to basic ship if GLB fails to load
+                    console.error('Error loading dopeship.glb:', error);
+                    console.log('Falling back to geometric ship');
                     createFallbackShip(group);
                 }
             );
             
-            // Add engine trail glow (always visible)
+            // Engine trail glow (always visible for 3rd person feedback)
             const trailGeometry = new THREE.ConeGeometry(0.5, 2, 8);
             const trailMaterial = new THREE.MeshBasicMaterial({
                 color: 0x00ffff,
@@ -666,7 +670,7 @@
             return group;
         }
         
-        // Fallback ship if GLB doesn't load
+        // Fallback ship if dopeship.glb doesn't load
         function createFallbackShip(group) {
             console.log('Using fallback ship geometry');
             const bodyGeometry = new THREE.ConeGeometry(0.8, 3, 4);
