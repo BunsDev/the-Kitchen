@@ -614,7 +614,7 @@
             group.position.y = 6.5;
             
             // Load dopeship.glb model
-            const loader = new GLTFLoader();  // Fixed: GLTFLoader is global, not THREE.GLTFLoader
+            const loader = new THREE.GLTFLoader();
             loader.load(
                 'dopeship.glb',
                 (gltf) => {
