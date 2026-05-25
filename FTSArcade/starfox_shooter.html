@@ -498,6 +498,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script>
         // Mobile Detection
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
@@ -604,15 +605,75 @@
         scene.add(pointLight2);
         
         // Player Ship - Enhanced for 3rd Person Visibility
+        // GLB Model Loading
+        let player = null;
+        let playerModelLoaded = false;
+        
         function createPlayerShip() {
             const group = new THREE.Group();
+            group.position.y = 6.5;
             
-            // Main body - brighter and more visible
+            // Load GLB model
+            const loader = new THREE.GLTFLoader();
+            loader.load(
+                'dopeship.glb',
+                (gltf) => {
+                    const model = gltf.scene;
+                    
+                    // Scale and orient the model
+                    model.scale.set(2, 2, 2);  // Adjust scale as needed
+                    model.rotation.y = Math.PI;  // Face forward (180 degrees)
+                    
+                    // Enhance materials for better visibility
+                    model.traverse((child) => {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                            if (child.material) {
+                                // Boost emissive for neon look
+                                child.material.emissive = new THREE.Color(0x00ffff);
+                                child.material.emissiveIntensity = 0.3;
+                            }
+                        }
+                    });
+                    
+                    group.add(model);
+                    playerModelLoaded = true;
+                    console.log('✓ Nebula Shadow Fighter loaded');
+                },
+                (progress) => {
+                    console.log('Loading model:', (progress.loaded / progress.total * 100).toFixed(0) + '%');
+                },
+                (error) => {
+                    console.error('Error loading GLB model:', error);
+                    // Fallback to basic ship if GLB fails to load
+                    createFallbackShip(group);
+                }
+            );
+            
+            // Add engine trail glow (always visible)
+            const trailGeometry = new THREE.ConeGeometry(0.5, 2, 8);
+            const trailMaterial = new THREE.MeshBasicMaterial({
+                color: 0x00ffff,
+                transparent: true,
+                opacity: 0.5
+            });
+            const trail = new THREE.Mesh(trailGeometry, trailMaterial);
+            trail.rotation.x = -Math.PI / 2;
+            trail.position.z = -3;
+            group.add(trail);
+            
+            return group;
+        }
+        
+        // Fallback ship if GLB doesn't load
+        function createFallbackShip(group) {
+            console.log('Using fallback ship geometry');
             const bodyGeometry = new THREE.ConeGeometry(0.8, 3, 4);
             const bodyMaterial = new THREE.MeshPhongMaterial({ 
                 color: 0x00ffff,
                 emissive: 0x00ffff,
-                emissiveIntensity: 0.5,  // Increased from 0.3
+                emissiveIntensity: 0.5,
                 flatShading: true,
                 shininess: 100
             });
@@ -620,12 +681,11 @@
             body.rotation.x = Math.PI / 2;
             group.add(body);
             
-            // Wings - more prominent
             const wingGeometry = new THREE.BoxGeometry(3, 0.1, 1);
             const wingMaterial = new THREE.MeshPhongMaterial({ 
                 color: 0xff00ff,
                 emissive: 0xff00ff,
-                emissiveIntensity: 0.4,  // Increased from 0.2
+                emissiveIntensity: 0.4,
                 flatShading: true,
                 shininess: 100
             });
@@ -633,48 +693,10 @@
             wing.position.z = -0.5;
             group.add(wing);
             
-            // Cockpit - bright yellow for visibility
-            const cockpitGeometry = new THREE.SphereGeometry(0.4, 6, 6);
-            const cockpitMaterial = new THREE.MeshPhongMaterial({ 
-                color: 0xffff00,
-                emissive: 0xffff00,
-                emissiveIntensity: 0.7,  // Increased from 0.5
-                flatShading: true,
-                shininess: 100
-            });
-            const cockpit = new THREE.Mesh(cockpitGeometry, cockpitMaterial);
-            cockpit.position.z = 0.3;
-            group.add(cockpit);
-            
-            // Engine glow - larger and brighter
-            const engineGeometry = new THREE.CylinderGeometry(0.3, 0.2, 0.5, 6);
-            const engineMaterial = new THREE.MeshBasicMaterial({ 
-                color: 0x00ffff,
-                transparent: true,
-                opacity: 0.9  // Increased from 0.8
-            });
-            const engine = new THREE.Mesh(engineGeometry, engineMaterial);
-            engine.rotation.x = Math.PI / 2;
-            engine.position.z = -1.5;
-            group.add(engine);
-            
-            // Add engine trail glow
-            const trailGeometry = new THREE.ConeGeometry(0.4, 1.5, 8);
-            const trailMaterial = new THREE.MeshBasicMaterial({
-                color: 0x00ffff,
-                transparent: true,
-                opacity: 0.4
-            });
-            const trail = new THREE.Mesh(trailGeometry, trailMaterial);
-            trail.rotation.x = -Math.PI / 2;
-            trail.position.z = -2.5;
-            group.add(trail);
-            
-            group.position.y = 6.5;
-            return group;
+            playerModelLoaded = true;
         }
         
-        const player = createPlayerShip();
+        player = createPlayerShip();
         scene.add(player);
         
         // Enemy Ship
